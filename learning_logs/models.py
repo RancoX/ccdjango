@@ -14,7 +14,7 @@ class Entry(models.Model):
     # something specific learned about a Topic above
     topic=models.ForeignKey(Topic, on_delete=models.CASCADE)
     text=models.TextField()
-    data_added=models.DateTimeField(auto_now_add=True)
+    date_added=models.DateTimeField(auto_now_add=True)
 
     class Meta:
         # this class redefines the meta data of this model class

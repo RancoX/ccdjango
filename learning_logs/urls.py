@@ -2,9 +2,12 @@
 from django.urls import path
 from . import views
 
-app_name='learning_logs'
+# this is the namespace
+app_name = 'learning_logs'
 
-urlpatterns=[
-    #home page
+urlpatterns = [
+    # home page
     path('', views.index, name='index'),
+    path('topics/', views.topics, name='topics'),
+    path('topics/topic_<int:topic_id>/',views.topic,name='topic')
 ]

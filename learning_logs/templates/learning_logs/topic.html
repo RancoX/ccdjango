@@ -2,10 +2,13 @@
 {% block content %}
 <h2>Topic: {{topic}}</h2>
 <h3>Entries:</h3>
+<p><a href="{% url 'learning_logs:new_entry' topic.id %}">Add new entry</a></p>
 <br>
 <ul>
     {% for entry in entries %}
     <li><b>Added on {{entry.date_added|date:"M j, Y H:i"}}: </b>{{entry.text}}</li>
+    {% empty %}
+    <li>Nothing has been added yet!</li>
     {% endfor %}
 </ul>
 

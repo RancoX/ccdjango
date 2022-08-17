@@ -68,3 +68,22 @@ def new_entry(request, topic_id):
             return redirect(reverse_urlpattern)
     context = {'form': form, 'topic':topic}
     return render(request, 'learning_logs/new_entry.html', context)
+
+
+def edit_entry(request, entry_id):
+    # edit an existing entry
+    entry=Entry.objects.get(pk=entry_id)
+    topic=entry.topic
+
+    if request.method=='GET':
+        # this is the request for prefilled table for editing
+        form=EntryForm(instance=entry)
+    
+    elif request.method=='POST':
+        form=EntryForm(instance=entry, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('learning_logs:topic', topic_id=topic.id)
+
+    context={'entry':entry, 'topic':topic, 'form':form}
+    return render(request, 'learning_logs/edit_entry.html',context=context)

@@ -12,6 +12,14 @@
     <h2>
         <a href="{% url 'learning_logs:index' %}">Learning Log Home</a> --
         <a href="{% url 'learning_logs:topics' %}">Topics</a>
+        <h3>
+            {% if user.is_authenticated %}
+            Hello, {{user.username}} - <a href="{% url 'users:logout' %}">Log Out</a>
+            {% else %}
+            <a href="{% url 'users:login' %}">Log In</a> --
+            <a href="{% url 'users:register' %}">Register</a>
+            {% endif %}
+        </h3>
     </h2>
     {% block content %}
     {% endblock content %}

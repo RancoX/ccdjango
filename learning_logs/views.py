@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from .models import Topic, Entry
 from .forms import TopicForm, EntryForm
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -11,19 +12,22 @@ def index(request):
     return render(request=request, template_name='learning_logs/index.html')
 
 
+@login_required
 def topics(request):
     topics = Topic.objects.order_by('date_added')
     context = {'topics': topics}
     return render(request=request, template_name='learning_logs/topics.html', context=context)
 
 
+@login_required
 def topic(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
-    entries = topic.entry_set.order_by('date_added')
+    entries = topic.entry_set.order_by('-date_added')
     context = {'topic': topic, 'entries': entries}
     return render(request, 'learning_logs/topic.html', context)
 
 
+@login_required
 def new_topic(request):
     '''
     The new_topic() view handles two scenarios:
@@ -49,8 +53,9 @@ def new_topic(request):
     return render(request, 'learning_logs/new_topic.html', context)
 
 
+@login_required
 def new_entry(request, topic_id):
-    topic=Topic.objects.get(id=topic_id)
+    topic = Topic.objects.get(id=topic_id)
 
     # if GET method, generate empty form then pass it to template
     if request.method == 'GET':
@@ -59,31 +64,33 @@ def new_entry(request, topic_id):
     elif request.method == 'POST':
         form = EntryForm(data=request.POST)
         if form.is_valid():
-            new_entry=form.save(commit=False)
-            new_entry.topic=topic
+            new_entry = form.save(commit=False)
+            new_entry.topic = topic
             new_entry.save()
-            reverse_urlpattern = reverse('learning_logs:topic', kwargs={'topic_id': topic_id})
+            reverse_urlpattern = reverse(
+                'learning_logs:topic', kwargs={'topic_id': topic_id})
             print(reverse_urlpattern)
             # alternatively return redirect('learning_logs:topic', topic_id=topic_id)
             return redirect(reverse_urlpattern)
-    context = {'form': form, 'topic':topic}
+    context = {'form': form, 'topic': topic}
     return render(request, 'learning_logs/new_entry.html', context)
 
 
+@login_required
 def edit_entry(request, entry_id):
     # edit an existing entry
-    entry=Entry.objects.get(pk=entry_id)
-    topic=entry.topic
+    entry = Entry.objects.get(pk=entry_id)
+    topic = entry.topic
 
-    if request.method=='GET':
+    if request.method == 'GET':
         # this is the request for prefilled table for editing
-        form=EntryForm(instance=entry)
-    
-    elif request.method=='POST':
-        form=EntryForm(instance=entry, data=request.POST)
+        form = EntryForm(instance=entry)
+
+    elif request.method == 'POST':
+        form = EntryForm(instance=entry, data=request.POST)
         if form.is_valid():
             form.save()
             return redirect('learning_logs:topic', topic_id=topic.id)
 
-    context={'entry':entry, 'topic':topic, 'form':form}
-    return render(request, 'learning_logs/edit_entry.html',context=context)
+    context = {'entry': entry, 'topic': topic, 'form': form}
+    return render(request, 'learning_logs/edit_entry.html', context=context)

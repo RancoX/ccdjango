@@ -1,6 +1,9 @@
 {% extends "learning_logs/base.html" %}
+{% block page_header %}
+<h3>Topic: {{topic}}</h3>
+{% endblock page_header %}
+
 {% block content %}
-<h2>Topic: {{topic}}</h2>
 <h3>Entries:</h3>
 {% if user.is_authenticated %}
 {% if can_edit %}
@@ -8,20 +11,27 @@
 {% endif %}
 {% endif %}
 <br>
-<ul>
+
     {% for entry in entries %}
-    {% if user.is_authenticated %}
-    {% if can_edit %}
-    <li><b><a href="{% url 'learning_logs:edit_entry' entry.id %}">Added on {{entry.date_added|date:"M j, Y H:i"}}: </a></b>{{entry.text}}</li>
-    {% else %}
-    <li><b>Added on {{entry.date_added|date:"M j, Y H:i"}}: </b>{{entry.text}}</li>
-    {% endif %}
-    {% else %}
-    <li><b>Added on {{entry.date_added|date:"M j, Y H:i"}}: </b>{{entry.text}}</li>
-    {% endif %}
+    <div class="card mb-3">
+        {% if user.is_authenticated %}
+        {% if can_edit %}
+        <h4 class="card-header">Added on {{entry.date_added|date:"M j, Y H:i"}} <small><a href="{% url 'learning_logs:edit_entry' entry.id%}">edit entry</a></small></h4>
+        <div class="card-body">{{entry.text}}</div>
+        
+        {% else %}
+        <h4 class="card-header">Added on {{entry.date_added|date:"M j, Y H:i"}}</h4>
+        <div class="card-body">{{entry.text}}</div>
+        {% endif %}
+        {% else %}
+        <h4 class="card-header">Added on {{entry.date_added|date:"M j, Y H:i"}}</h4>
+        <div class="card-body">{{entry.text}}</div>
+        {% endif %}
+    </div>
+
     {% empty %}
-    <li>Nothing has been added yet!</li>
+    <p>Nothing has been added yet!</p>
     {% endfor %}
-</ul>
+
 
 {% endblock content %}

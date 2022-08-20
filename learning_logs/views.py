@@ -22,7 +22,10 @@ def topics(request):
 def topic(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
     entries = topic.entry_set.order_by('-date_added')
-    context = {'topic': topic, 'entries': entries}
+    can_edit = True
+    if topic.user != request.user:
+        can_edit = False
+    context = {'topic': topic, 'entries': entries, 'can_edit': can_edit}
     return render(request, 'learning_logs/topic.html', context)
 
 

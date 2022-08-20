@@ -3,6 +3,7 @@ from django.urls import reverse
 from .models import Topic, Entry
 from .forms import TopicForm, EntryForm
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 
 # Create your views here.
 
@@ -12,14 +13,12 @@ def index(request):
     return render(request=request, template_name='learning_logs/index.html')
 
 
-@login_required
 def topics(request):
-    topics = Topic.objects.order_by('date_added')
+    topics = Topic.objects.all().order_by('date_added')
     context = {'topics': topics}
     return render(request=request, template_name='learning_logs/topics.html', context=context)
 
 
-@login_required
 def topic(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
     entries = topic.entry_set.order_by('-date_added')
@@ -45,7 +44,11 @@ def new_topic(request):
         form = TopicForm(data=request.POST)
         # data validation
         if form.is_valid():
-            form.save()
+            # create a temp without actual commit
+            temp = form.save(commit=False)
+            # link user as the ForeignKey to new topic
+            temp.user = request.user
+            temp.save()
             return redirect('learning_logs:topics')
 
     # display an empty form or invalid form if form.is_valid() evaluated to False
@@ -56,6 +59,9 @@ def new_topic(request):
 @login_required
 def new_entry(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
+    # make sure the current user cannot add new entry to another user's with url probing
+    if topic.user != request.user:
+        raise Http404
 
     # if GET method, generate empty form then pass it to template
     if request.method == 'GET':
@@ -81,6 +87,8 @@ def edit_entry(request, entry_id):
     # edit an existing entry
     entry = Entry.objects.get(pk=entry_id)
     topic = entry.topic
+    if topic.user != request.user:
+        raise Http404
 
     if request.method == 'GET':
         # this is the request for prefilled table for editing

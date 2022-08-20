@@ -2,12 +2,18 @@
 {% block content %}
 <h2>Topic: {{topic}}</h2>
 <h3>Entries:</h3>
+{% if user.is_authenticated %}
 <p><a href="{% url 'learning_logs:new_entry' topic.id %}">Add new entry</a></p>
+{% endif %}
 <br>
 <ul>
     {% for entry in entries %}
-    <li><b><a href="{% url 'learning_logs:edit_entry' entry.id %}">Added on {{entry.date_added|date:"M j, Y H:i"}}:
-            </a></b>{{entry.text}}</li>
+
+    {% if user.is_authenticated %}
+    <li><b><a href="{% url 'learning_logs:edit_entry' entry.id %}">Added on {{entry.date_added|date:"M j, Y H:i"}}:</a></b>{{entry.text}}</li>
+    {% else %}
+    <li><b>Added on {{entry.date_added|date:"M j, Y H:i"}}:</b>{{entry.text}}</li>
+    {% endif %}
     {% empty %}
     <li>Nothing has been added yet!</li>
     {% endfor %}
